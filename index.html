@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="expressions API docs, for the Dart programming language.">
+  <title>expressions - Dart API docs</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="static-assets/github.css?v1">
+  <link rel="stylesheet" href="static-assets/styles.css?v1">
+  <link rel="icon" href="static-assets/favicon.png?v1">
+  
+</head>
+
+<body data-base-href="" data-using-base-href="false" class="light-theme">
+<div id="overlay-under-drawer"></div>
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="https://github.com/appsup-dart/expressions">expressions package</a></li>
+  </ol>
+  <div class="self-name">expressions</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <button class="toggle" id="theme-button" title="Toggle between light and dark mode" aria-label="Light and dark mode toggle">
+    <span id="dark-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      dark_mode
+    </span>
+    <span id="light-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      light_mode
+    </span>
+  </button>
+</header>
+<main>
+  <div id="dartdoc-main-content" class="main-content">
+      
+<section class="desc markdown">
+  <p><a href="https://techforpalestine.org/learn-more"><img src="https://badge.techforpalestine.org/default" alt="Ceasefire Now"></a></p>
+<p><a href="https://github.com/sponsors/rbellens">:heart: sponsor</a></p>
+<h1 id="expressions">expressions</h1>
+<p><a href="https://github.com/appsup-dart/expressions/actions"><img src="https://github.com/appsup-dart/expressions/workflows/Dart%20CI/badge.svg" alt="Build Status"></a>
+<a href="https://pub.dev/packages/expressions"><img src="https://img.shields.io/pub/v/expressions.svg" alt="pub package"></a>
+<a href="https://codecov.io/gh/appsup-dart/expressions"><img src="https://codecov.io/gh/appsup-dart/expressions/branch/master/graph/badge.svg" alt="Coverage"></a>
+<a href="https://appsup-dart.github.io/expressions/"><img src="https://img.shields.io/badge/docs-latest-blue.svg" alt="Documentation"></a></p>
+<p>A library to parse and evaluate simple expressions with support for reactive streams.</p>
+<p>This library can handle simple expressions, but no operations, blocks of code, control flow statements and so on.
+It supports a syntax that is common to most programming languages (so no special things like string interpolation,
+cascade notation, named parameters).</p>
+<p>It is partly inspired by <a href="http://jsep.from.so/">jsep</a>.</p>
+<h2 id="features">Features</h2>
+<ul>
+<li>🚀 <strong>Parse and evaluate expressions</strong> - Support for arithmetic, logical, comparison, and bitwise operators</li>
+<li>🔄 <strong>Reactive evaluation</strong> - Built-in support for Streams and Futures with <code>AsyncExpressionEvaluator</code></li>
+<li>🎯 <strong>Type-safe member access</strong> - Define custom accessors for object properties</li>
+<li>📦 <strong>Built-in functions</strong> - Math, string, and list manipulation functions included</li>
+<li>🎨 <strong>Extensible</strong> - Easy to add custom functions and operators</li>
+<li>📍 <strong>Source location tracking</strong> - Better error messages with line/column information</li>
+<li>⚡ <strong>High performance</strong> - Optimized parser and evaluator (see benchmarks)</li>
+</ul>
+<h2 id="usage">Usage</h2>
+<h3 id="basic-evaluation">Basic Evaluation</h3>
+<pre class="language-dart"><code class="language-dart">import 'package:expressions/expressions.dart';
+
+// Parse and evaluate a simple expression
+var expression = Expression.parse('x + y * 2');
+const evaluator = ExpressionEvaluator();
+
+var result = evaluator.eval(expression, {'x': 10, 'y': 5});
+print(result); // 20
+</code></pre>
+<h3 id="member-access">Member Access</h3>
+<pre class="language-dart"><code class="language-dart">import 'package:expressions/expressions.dart';
+
+class Person {
+  final String name;
+  final int age;
+  Person(this.name, this.age);
+}
+
+// Create evaluator with member accessors
+final evaluator = ExpressionEvaluator(memberAccessors: [
+  MemberAccessor&lt;Person&gt;({
+    'name': (p) =&gt; p.name,
+    'age': (p) =&gt; p.age,
+  }),
+]);
+
+var expr = Expression.parse("'Hello ' + person.name");
+var result = evaluator.eval(expr, {
+  'person': Person('Jane', 25)
+});
+print(result); // Hello Jane
+</code></pre>
+<h3 id="built-in-functions">Built-in Functions</h3>
+<pre class="language-dart"><code class="language-dart">import 'package:expressions/expressions.dart';
+
+// Use built-in math functions
+var expr = Expression.parse('sqrt(pow(x, 2) + pow(y, 2))');
+const evaluator = ExpressionEvaluator();
+
+var result = evaluator.eval(expr, {
+  ...BuiltInFunctions.mathFunctions,
+  'x': 3,
+  'y': 4,
+});
+print(result); // 5.0
+</code></pre>
+<h3 id="reactive-evaluation-with-streams">Reactive Evaluation with Streams</h3>
+<pre class="language-dart"><code class="language-dart">import 'dart:async';
+import 'package:expressions/expressions.dart';
+
+const evaluator = AsyncExpressionEvaluator();
+var expr = Expression.parse('temperature &gt; threshold');
+
+var tempController = StreamController&lt;double&gt;();
+var thresholdController = StreamController&lt;double&gt;();
+
+var alarm = evaluator.eval(expr, {
+  'temperature': tempController.stream,
+  'threshold': thresholdController.stream,
+});
+
+alarm.listen((isAlarm) {
+  print(isAlarm ? 'ALARM!' : 'Normal');
+});
+
+thresholdController.add(30.0);
+tempController.add(25.0); // Normal
+tempController.add(35.0); // ALARM!
+</code></pre>
+<h2 id="supported-operators">Supported Operators</h2>
+<h3 id="arithmetic">Arithmetic</h3>
+<p><code>+</code> <code>-</code> <code>*</code> <code>/</code> <code>%</code> <code>~/</code> (integer division)</p>
+<h3 id="comparison">Comparison</h3>
+<p><code>==</code> <code>!=</code> <code>&lt;</code> <code>&gt;</code> <code>&lt;=</code> <code>&gt;=</code></p>
+<h3 id="logical">Logical</h3>
+<p><code>&amp;&amp;</code> <code>||</code> <code>!</code></p>
+<h3 id="bitwise">Bitwise</h3>
+<p><code>&amp;</code> <code>|</code> <code>^</code> <code>~</code> <code>&lt;&lt;</code> <code>&gt;&gt;</code></p>
+<h3 id="other">Other</h3>
+<p><code>??</code> (null-coalescing), <code>? :</code> (ternary conditional)</p>
+<h2 id="performance">Performance</h2>
+<p>Run benchmarks with:</p>
+<pre class="language-bash"><code class="language-bash">dart benchmark/expression_benchmark.dart
+</code></pre>
+<p>Typical performance on modern hardware:</p>
+<ul>
+<li><strong>Parsing</strong>: ~10,000-50,000 expressions/second</li>
+<li><strong>Evaluation</strong>: ~100,000-500,000 evaluations/second</li>
+<li><strong>Async evaluation</strong>: ~1,000-5,000 evaluations/second</li>
+</ul>
+<h2 id="contributing">Contributing</h2>
+<p>Contributions are welcome! Please read the <a href="CONTRIBUTING.md">Contributing Guide</a> first.</p>
+<h2 id="security">Security</h2>
+<p>Please review the <a href="SECURITY.md">Security Policy</a> before using this library with untrusted input.</p>
+<h2 id="documentation">Documentation</h2>
+<p>📚 Full API documentation is available at <strong><a href="https://appsup-dart.github.io/expressions/">appsup-dart.github.io/expressions</a></strong></p>
+<h2 id="features-and-bugs">Features and bugs</h2>
+<p>Please file feature requests and bugs at the <a href="https://github.com/appsup-dart/expressions/issues">issue tracker</a>.</p>
+<h2 id="sponsor">Sponsor</h2>
+<p>Creating and maintaining this package takes a lot of time. If you like the result, please consider to <a href="https://github.com/sponsors/rbellens">:heart: sponsor</a>.
+With your support, I will be able to further improve and support this project.
+Also, check out my other dart packages at <a href="https://pub.dev/packages?q=publisher%3Aappsup.be">pub.dev</a>.</p>
+</section>
+
+
+      <section class="summary">
+          <h2>Libraries</h2>
+        <dl>
+          <dt id="expressions">
+  <span class="name"><a href="expressions/">expressions</a></span> 
+
+</dt>
+<dd>
+</dd>
+
+        </dl>
+      </section>
+  </div> <!-- /.main-content -->
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="https://github.com/appsup-dart/expressions">expressions package</a></li>
+</ol>
+
+    <h5 class="hidden-xs"><span class="package-name">expressions</span> <span class="package-kind">package</span></h5>
+    <ol>
+      <li class="section-title">Libraries</li>
+      <li><a href="expressions/">expressions</a></li>
+</ol>
+
+  </div>
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+  </div>
+</main>
+<footer>
+  <span class="no-break">
+    expressions
+      0.2.5+3
+  </span>
+  
+</footer>
+
+
+<script src="static-assets/highlight.pack.js?v1"></script>
+<script src="static-assets/docs.dart.js"></script>
+
+</body>
+</html>
+

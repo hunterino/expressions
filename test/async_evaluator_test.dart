@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:expressions/expressions.dart';
-import 'package:expressions/src/async_evaluator.dart';
 import 'package:fake_async/fake_async.dart' as fake_async;
 import 'package:test/test.dart';
 

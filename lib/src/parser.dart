@@ -1,5 +1,3 @@
-library expressions.parser;
-
 import 'expressions.dart';
 import 'package:petitparser/petitparser.dart';
 

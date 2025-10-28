@@ -1,29 +1,29 @@
-library expressions.evaluator;
-
 import 'expressions.dart';
 import 'async_evaluator.dart';
 import 'package:meta/meta.dart';
 
-/// Handles evaluation of expressions
+/// Handles evaluation of expressions.
 ///
 /// The default [ExpressionEvaluator] handles all expressions except member
 /// expressions. To create an [ExpressionEvaluator] that handles member
 /// expressions, set a list of [MemberAccessor] instances to the
 /// [memberAccessors] argument of the constructor.
 ///
-/// For example:
+/// Example:
+/// ```dart
+/// class Person {
+///   final String firstname;
+///   final String lastname;
+///   Person(this.firstname, this.lastname);
+/// }
 ///
-///   var evaluator = ExpressionEvaluator(memberAccessors: [
-///     MemberAccessor&lt;Person&gt;({
-///       'firstname': (v)=>v.firstname,
-///       'lastname': (v)=>v.lastname,
-///       'address': (v)=>v.address
-///     }),
-///     MemberAccessor&lt;Address&gt;({
-///       'street': (v)=>v.street,
-///       'locality': (v)=>v.locality,
-///     }),
-///   ]);
+/// var evaluator = ExpressionEvaluator(memberAccessors: [
+///   MemberAccessor<Person>({
+///     'firstname': (v) => v.firstname,
+///     'lastname': (v) => v.lastname,
+///   }),
+/// ]);
+/// ```
 ///
 /// The [MemberAccessor.mapAccessor] can be used to access [Map] items with
 /// member access syntax.
@@ -34,16 +34,15 @@ import 'package:meta/meta.dart';
 /// expression on each value of those streams or futures. The result is always a
 /// stream.
 ///
-/// For example:
-///
-///   var evaluator = ExpressionEvaluator.async();
-///
-///   var expression = Expression.parse('x > 70');
-///
-///   var r = evaluator.eval(expression, {'x': Stream.fromIterable([50, 80])});
-///
-///   r.forEach(print); // prints false and true
-///
+/// Example:
+/// ```dart
+/// var evaluator = const ExpressionEvaluator.async();
+/// var expression = Expression.parse('x > 70');
+/// var r = evaluator.eval(expression, {
+///   'x': Stream.fromIterable([50, 80])
+/// });
+/// await r.forEach(print); // prints false and true
+/// ```
 class ExpressionEvaluator {
   final List<MemberAccessor> memberAccessors;
 
@@ -246,7 +245,7 @@ abstract class MemberAccessor<T> {
 }
 
 class _MemberAccessorFallback<T> implements MemberAccessor<T> {
-  final AnyMemberAccessor<T> accessor;
+  final dynamic Function(T, String) accessor;
 
   const _MemberAccessorFallback(this.accessor);
   @override

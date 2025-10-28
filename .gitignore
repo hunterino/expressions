@@ -15,3 +15,6 @@ doc/api/
 *.ipr
 *.iws
 .idea/
+coverage/
+logs/
+CLAUDE.md

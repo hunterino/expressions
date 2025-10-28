@@ -3,11 +3,14 @@ import 'dart:async';
 import 'package:expressions/expressions.dart';
 import 'package:rxdart/rxdart.dart';
 
+/// Converts a value to a Stream.
 Stream _asStream(dynamic v) => v is Stream
     ? v
     : v is Future
         ? Stream.fromFuture(v)
         : Stream.value(v);
+
+/// Wraps a value in a Literal expression.
 Literal _asLiteral(dynamic v) {
   if (v is Map) {
     return Literal(v.map((k, v) => MapEntry(_asLiteral(k), _asLiteral(v))));
@@ -18,12 +21,39 @@ Literal _asLiteral(dynamic v) {
   return Literal(v);
 }
 
+/// An asynchronous expression evaluator that works with Streams and Futures.
+///
+/// This evaluator extends [ExpressionEvaluator] to handle reactive data sources.
+/// When variables in the context are Streams or Futures, the evaluator will
+/// automatically combine them and emit results as values change.
+///
+/// The evaluation result is always a [Stream] that emits values as the
+/// source streams emit new values.
+///
+/// Example:
+/// ```dart
+/// var evaluator = const AsyncExpressionEvaluator();
+/// var expr = Expression.parse('x + y');
+///
+/// var xController = StreamController<int>();
+/// var yController = StreamController<int>();
+///
+/// var result = evaluator.eval(expr, {
+///   'x': xController.stream,
+///   'y': yController.stream,
+/// });
+///
+/// result.listen(print);
+///
+/// xController.add(10); // No output yet, waiting for y
+/// yController.add(5);  // Outputs: 15
+/// xController.add(20); // Outputs: 25
+/// ```
 class AsyncExpressionEvaluator extends ExpressionEvaluator {
   final ExpressionEvaluator baseEvaluator = const ExpressionEvaluator();
 
-  const AsyncExpressionEvaluator(
-      {List<MemberAccessor> memberAccessors = const []})
-      : super(memberAccessors: memberAccessors);
+  /// Creates an async expression evaluator with optional [memberAccessors].
+  const AsyncExpressionEvaluator({super.memberAccessors = const []});
 
   @override
   Stream eval(Expression expression, Map<String, dynamic> context) {

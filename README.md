@@ -2,64 +2,157 @@
 
 [:heart: sponsor](https://github.com/sponsors/rbellens)
 
-
 # expressions
 
-[![Build Status](https://travis-ci.org/appsup-dart/expressions.svg?branch=master)](https://travis-ci.org/appsup-dart/expressions)
+[![Build Status](https://github.com/appsup-dart/expressions/workflows/Dart%20CI/badge.svg)](https://github.com/appsup-dart/expressions/actions)
+[![pub package](https://img.shields.io/pub/v/expressions.svg)](https://pub.dev/packages/expressions)
+[![Coverage](https://codecov.io/gh/appsup-dart/expressions/branch/master/graph/badge.svg)](https://codecov.io/gh/appsup-dart/expressions)
+[![Documentation](https://img.shields.io/badge/docs-latest-blue.svg)](https://appsup-dart.github.io/expressions/)
 
-
-A library to parse and evaluate simple expressions.
+A library to parse and evaluate simple expressions with support for reactive streams.
 
 This library can handle simple expressions, but no operations, blocks of code, control flow statements and so on.
-It supports a syntax that is common to most programming languages (so no special things like string interpolation, 
+It supports a syntax that is common to most programming languages (so no special things like string interpolation,
 cascade notation, named parameters).
 
 It is partly inspired by [jsep](http://jsep.from.so/).
 
+## Features
+
+- 🚀 **Parse and evaluate expressions** - Support for arithmetic, logical, comparison, and bitwise operators
+- 🔄 **Reactive evaluation** - Built-in support for Streams and Futures with `AsyncExpressionEvaluator`
+- 🎯 **Type-safe member access** - Define custom accessors for object properties
+- 📦 **Built-in functions** - Math, string, and list manipulation functions included
+- 🎨 **Extensible** - Easy to add custom functions and operators
+- 📍 **Source location tracking** - Better error messages with line/column information
+- ⚡ **High performance** - Optimized parser and evaluator (see benchmarks)
+
 ## Usage
 
-Example 1: evaluate expression with default evaluator
+### Basic Evaluation
 
-    // Parse expression:
-    Expression expression = Expression.parse("cos(x)*cos(x)+sin(x)*sin(x)==1");
+```dart
+import 'package:expressions/expressions.dart';
 
-    // Create context containing all the variables and functions used in the expression
-    var context = {
-      "x": pi / 5,
-      "cos": cos,
-      "sin": sin
-    };
+// Parse and evaluate a simple expression
+var expression = Expression.parse('x + y * 2');
+const evaluator = ExpressionEvaluator();
 
-    // Evaluate expression
-    final evaluator = const ExpressionEvaluator();
-    var r = evaluator.eval(expression, context);
+var result = evaluator.eval(expression, {'x': 10, 'y': 5});
+print(result); // 20
+```
+
+### Member Access
+
+```dart
+import 'package:expressions/expressions.dart';
+
+class Person {
+  final String name;
+  final int age;
+  Person(this.name, this.age);
+}
+
+// Create evaluator with member accessors
+final evaluator = ExpressionEvaluator(memberAccessors: [
+  MemberAccessor<Person>({
+    'name': (p) => p.name,
+    'age': (p) => p.age,
+  }),
+]);
+
+var expr = Expression.parse("'Hello ' + person.name");
+var result = evaluator.eval(expr, {
+  'person': Person('Jane', 25)
+});
+print(result); // Hello Jane
+```
+
+### Built-in Functions
+
+```dart
+import 'package:expressions/expressions.dart';
+
+// Use built-in math functions
+var expr = Expression.parse('sqrt(pow(x, 2) + pow(y, 2))');
+const evaluator = ExpressionEvaluator();
+
+var result = evaluator.eval(expr, {
+  ...BuiltInFunctions.mathFunctions,
+  'x': 3,
+  'y': 4,
+});
+print(result); // 5.0
+```
+
+### Reactive Evaluation with Streams
+
+```dart
+import 'dart:async';
+import 'package:expressions/expressions.dart';
+
+const evaluator = AsyncExpressionEvaluator();
+var expr = Expression.parse('temperature > threshold');
+
+var tempController = StreamController<double>();
+var thresholdController = StreamController<double>();
+
+var alarm = evaluator.eval(expr, {
+  'temperature': tempController.stream,
+  'threshold': thresholdController.stream,
+});
+
+alarm.listen((isAlarm) {
+  print(isAlarm ? 'ALARM!' : 'Normal');
+});
+
+thresholdController.add(30.0);
+tempController.add(25.0); // Normal
+tempController.add(35.0); // ALARM!
+```
 
 
-    print(r); // = true
 
+## Supported Operators
 
+### Arithmetic
+`+` `-` `*` `/` `%` `~/` (integer division)
 
-Example 2: evaluate expression with custom evaluator
+### Comparison
+`==` `!=` `<` `>` `<=` `>=`
 
-    // Parse expression:
-    Expression expression = Expression.parse("'Hello '+person.name");
+### Logical
+`&&` `||` `!`
 
-    // Create context containing all the variables and functions used in the expression
-    var context = {
-      "person": new Person("Jane")
-    };
+### Bitwise
+`&` `|` `^` `~` `<<` `>>`
 
-    // The default evaluator can not handle member expressions like `person.name`.
-    // When you want to use these kind of expressions, you'll need to create a
-    // custom evaluator that implements the `evalMemberExpression` to get property
-    // values of an object (e.g. with `dart:mirrors` or some other strategy).
-    final evaluator = const MyEvaluator();
-    var r = evaluator.eval(expression, context);
+### Other
+`??` (null-coalescing), `? :` (ternary conditional)
 
+## Performance
 
-    print(r); // = 'Hello Jane'
+Run benchmarks with:
+```bash
+dart benchmark/expression_benchmark.dart
+```
 
+Typical performance on modern hardware:
+- **Parsing**: ~10,000-50,000 expressions/second
+- **Evaluation**: ~100,000-500,000 evaluations/second
+- **Async evaluation**: ~1,000-5,000 evaluations/second
 
+## Contributing
+
+Contributions are welcome! Please read the [Contributing Guide](CONTRIBUTING.md) first.
+
+## Security
+
+Please review the [Security Policy](SECURITY.md) before using this library with untrusted input.
+
+## Documentation
+
+📚 Full API documentation is available at **[appsup-dart.github.io/expressions](https://appsup-dart.github.io/expressions/)**
 
 ## Features and bugs
 

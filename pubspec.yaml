@@ -1,6 +1,6 @@
 name: expressions
 description: A library to parse and evaluate simple dart and javascript like expressions.
-version: 0.2.5+3
+version: 0.2.6
 homepage: https://github.com/appsup-dart/expressions
 repository: https://github.com/appsup-dart/expressions
 
@@ -33,8 +33,7 @@ melos:
       workspaceChangelog: false
 
   scripts:
-    preversion: 
+    preversion:
       exec: dart test -j 1
 
 
-  
